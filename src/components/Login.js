@@ -1,11 +1,25 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation after login
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 function Login({ setAuthToken }) {
-  // Accept setAuthToken as a prop
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Hook to navigate programmatically
+  const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [emailFilled, setEmailFilled] = useState(false);
+  const [passwordFilled, setPasswordFilled] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -21,45 +35,130 @@ function Login({ setAuthToken }) {
       const data = await response.json();
 
       if (response.ok) {
-        // Store the token in localStorage and set the token state in parent component
         localStorage.setItem("authToken", data.token);
-        setAuthToken(data.token); // Make sure this line uses the setAuthToken prop
-
-        // Redirect to the home page
+        setAuthToken(data.token);
         navigate("/");
       } else {
-        console.error("Login failed:", data.message);
+        setErrorMessage(data.message || "Login failed. Please try again.");
       }
     } catch (error) {
-      console.error("Error logging in:", error);
+      setErrorMessage("Error logging in. Please try again.");
     }
   };
 
+  const handleClickShowPassword = () => setShowPassword((prev) => !prev);
+
+  // Autofill detection function
+  useEffect(() => {
+    const autofillListener = () => {
+      setEmailFilled(
+        Boolean(document.querySelector('input[name="email"]:autofill'))
+      );
+      setPasswordFilled(
+        Boolean(document.querySelector('input[name="password"]:autofill'))
+      );
+    };
+
+    window.addEventListener("animationstart", autofillListener, true);
+    return () =>
+      window.removeEventListener("animationstart", autofillListener, true);
+  }, []);
+
   return (
-    <div>
-      <h2>Login</h2>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label>
-          <input
+    <Container maxWidth="xs">
+      <Paper elevation={3} sx={{ padding: 4, mt: 8 }}>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="h4" gutterBottom>
+            Welcome Back
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Please login to continue
+          </Typography>
+        </Box>
+
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label={emailFilled ? "" : "Email"}
+            name="email"
             type="email"
+            variant="outlined"
+            fullWidth
+            required
+            margin="normal"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
+            InputProps={{
+              sx: {
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset",
+                  WebkitTextFillColor: "black",
+                },
+              },
+            }}
+            InputLabelProps={{
+              shrink: emailFilled || Boolean(email),
+            }}
           />
-        </div>
-        <div>
-          <label>Password:</label>
-          <input
-            type="password"
+
+          <TextField
+            label={passwordFilled ? "" : "Password"}
+            name="password"
+            type={showPassword ? "text" : "password"}
+            variant="outlined"
+            fullWidth
+            required
+            margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleClickShowPassword}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+              sx: {
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset",
+                  WebkitTextFillColor: "black",
+                },
+              },
+            }}
+            InputLabelProps={{
+              shrink: passwordFilled || Boolean(password),
+            }}
           />
-        </div>
-        <button type="submit">Login</button>
-      </form>
-    </div>
+
+          {errorMessage && (
+            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+              {errorMessage}
+            </Typography>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 3 }}
+          >
+            Login
+          </Button>
+        </form>
+
+        {/* Link to the registration page */}
+        <Typography variant="body2" sx={{ mt: 3, textAlign: "center" }}>
+          Don’t have an account?{" "}
+          <Link
+            to="/register"
+            style={{ textDecoration: "none", color: "#FFC107" }}
+          >
+            Register here
+          </Link>
+        </Typography>
+      </Paper>
+    </Container>
   );
 }
 
