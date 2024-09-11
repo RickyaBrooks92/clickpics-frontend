@@ -1,27 +1,36 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // For redirecting
+import React, { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import {
+  Box,
+  Button,
+  Container,
+  TextField,
+  Typography,
+  Paper,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
-const Register = ({ setAuthToken }) => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
+function Register({ setAuthToken }) {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // Toggle password visibility
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Toggle confirm password visibility
+  const [errorMessage, setErrorMessage] = useState("");
+  const [emailFilled, setEmailFilled] = useState(false);
+  const [passwordFilled, setPasswordFilled] = useState(false);
+  const [confirmPasswordFilled, setConfirmPasswordFilled] = useState(false);
+  const navigate = useNavigate();
 
-  const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // For redirecting
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  // Handle form input changes
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match");
+      return;
+    }
 
     try {
       const response = await fetch("http://localhost:5001/api/users/register", {
@@ -29,66 +38,176 @@ const Register = ({ setAuthToken }) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }),
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "An error occurred");
-      }
 
       const data = await response.json();
 
-      // Store the token in localStorage and pass it to the parent component
-      localStorage.setItem("authToken", data.token);
-      setAuthToken(data.token); // Set the token to trigger UI changes
-
-      // Redirect to the home page
-      navigate("/");
+      if (response.ok) {
+        localStorage.setItem("authToken", data.token);
+        setAuthToken(data.token);
+        navigate("/");
+      } else {
+        setErrorMessage(
+          data.message || "Registration failed. Please try again."
+        );
+      }
     } catch (error) {
-      setMessage(error.message);
+      setErrorMessage("Error registering. Please try again.");
     }
   };
 
+  // Autofill detection function
+  useEffect(() => {
+    const autofillListener = () => {
+      setEmailFilled(
+        Boolean(document.querySelector('input[name="email"]:autofill'))
+      );
+      setPasswordFilled(
+        Boolean(document.querySelector('input[name="password"]:autofill'))
+      );
+      setConfirmPasswordFilled(
+        Boolean(
+          document.querySelector('input[name="confirmPassword"]:autofill')
+        )
+      );
+    };
+
+    window.addEventListener("animationstart", autofillListener, true);
+    return () =>
+      window.removeEventListener("animationstart", autofillListener, true);
+  }, []);
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword(!showConfirmPassword);
+
   return (
-    <div>
-      <h2>Register</h2>
-      {message && <p>{message}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div>
-          <label>Email</label>
-          <input
-            type="email"
+    <Container maxWidth="xs">
+      <Paper elevation={3} sx={{ padding: 4, mt: 8 }}>
+        <Box sx={{ textAlign: "center" }}>
+          <Typography variant="h4" gutterBottom>
+            Create an Account
+          </Typography>
+          <Typography variant="body1" color="textSecondary">
+            Join us and start capturing memories!
+          </Typography>
+        </Box>
+
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label={emailFilled ? "" : "Email"}
             name="email"
-            value={formData.email}
-            onChange={handleChange}
+            type="email"
+            variant="outlined"
+            fullWidth
             required
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            InputProps={{
+              sx: {
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset",
+                  WebkitTextFillColor: "black",
+                },
+              },
+            }}
+            InputLabelProps={{
+              shrink: emailFilled || Boolean(email),
+            }}
           />
-        </div>
-        <div>
-          <label>Password</label>
-          <input
-            type="password"
+
+          <TextField
+            label={passwordFilled ? "" : "Password"}
             name="password"
-            value={formData.password}
-            onChange={handleChange}
+            type={showPassword ? "text" : "password"} // Toggle between text and password
+            variant="outlined"
+            fullWidth
             required
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            InputProps={{
+              sx: {
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset",
+                  WebkitTextFillColor: "black",
+                },
+              },
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleClickShowPassword}>
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            InputLabelProps={{
+              shrink: passwordFilled || Boolean(password),
+            }}
           />
-        </div>
-        <button type="submit">Register</button>
-      </form>
-    </div>
+
+          <TextField
+            label={confirmPasswordFilled ? "" : "Confirm Password"}
+            name="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"} // Toggle between text and password
+            variant="outlined"
+            fullWidth
+            required
+            margin="normal"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            InputProps={{
+              sx: {
+                "&:-webkit-autofill": {
+                  WebkitBoxShadow: "0 0 0 1000px white inset",
+                  WebkitTextFillColor: "black",
+                },
+              },
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleClickShowConfirmPassword}>
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            InputLabelProps={{
+              shrink: confirmPasswordFilled || Boolean(confirmPassword),
+            }}
+          />
+
+          {errorMessage && (
+            <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+              {errorMessage}
+            </Typography>
+          )}
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 3 }}
+          >
+            Register
+          </Button>
+        </form>
+
+        {/* Link to login page */}
+        <Typography variant="body2" sx={{ mt: 3, textAlign: "center" }}>
+          Already have an account?{" "}
+          <Link
+            to="/login"
+            style={{ textDecoration: "none", color: "#FFC107" }}
+          >
+            Log in here
+          </Link>
+        </Typography>
+      </Paper>
+    </Container>
   );
-};
+}
 
 export default Register;

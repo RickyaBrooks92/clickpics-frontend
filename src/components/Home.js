@@ -1,78 +1,123 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import {
+  Container,
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+} from "@mui/material";
 import { Link } from "react-router-dom";
-import { Box, Button, Typography, Container, Stack } from "@mui/material";
 
 const Home = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
-  // Logout function
-  const logout = () => {
-    localStorage.removeItem("authToken");
-    window.location.href = "/";
-  };
+  const pricingOptions = [
+    { title: "Standard", guests: "50-100 Guests", price: "$500" },
+    { title: "Premium", guests: "100-200 Guests", price: "$750" },
+    { title: "Deluxe", guests: "200-300 Guests", price: "$1000" },
+    { title: "Custom", guests: "Contact us for a custom quote", price: "" },
+  ];
 
   return (
-    <Container maxWidth="md">
-      <Box sx={{ textAlign: "center", mt: 8 }}>
-        <Typography variant="h2" color="primary" gutterBottom>
+    <Container maxWidth="lg" sx={{ mt: 8 }}>
+      {/* Introduction Section */}
+      <Box sx={{ textAlign: "center", mb: 8 }}>
+        <Typography variant="h3" gutterBottom>
           Welcome to ClickPics
         </Typography>
+        <Typography variant="h5" color="textSecondary" gutterBottom>
+          Capture your life's best moments through the eyes of those who matter
+          most.
+        </Typography>
+      </Box>
 
-        {isLoggedIn ? (
-          <Stack spacing={2} direction="row" justifyContent="center" mt={4}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => (window.location.href = "/create-event")}
-              sx={{ color: "#000" }} // Black text on yellow button
-            >
-              Create Event
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => (window.location.href = "/upload-image")}
-              sx={{ color: "#fff" }} // White text on black button
-            >
-              Upload Image
-            </Button>
-            <Button variant="outlined" color="secondary" onClick={logout}>
-              Logout
-            </Button>
-          </Stack>
-        ) : (
-          <Box mt={4}>
-            <Typography variant="h6" color="textSecondary" gutterBottom>
-              Please log in or register to create events and upload images.
-            </Typography>
-            <Stack spacing={2} direction="row" justifyContent="center" mt={2}>
-              <Button
-                variant="contained"
-                color="primary"
-                component={Link}
-                to="/register"
-                sx={{ color: "#000" }} // Black text on yellow button
+      {/* Pricing Section */}
+      <Box sx={{ mt: 8 }}>
+        <Typography variant="h4" align="center" gutterBottom>
+          Our Pricing Plans
+        </Typography>
+        <Typography
+          variant="body1"
+          align="center"
+          color="textSecondary"
+          gutterBottom
+        >
+          Select the best plan for your event.
+        </Typography>
+
+        <Grid container spacing={4} justifyContent="center" sx={{ mt: 4 }}>
+          {pricingOptions.map((option, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card
+                elevation={3}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  height: "100%",
+                  textAlign: "center",
+                  p: 3,
+                  bgcolor: "#f5f5f5",
+                }}
               >
-                Register
-              </Button>
-              <Button
-                variant="outlined"
-                color="secondary"
-                component={Link}
-                to="/login"
-              >
-                Login
-              </Button>
-            </Stack>
-          </Box>
-        )}
+                <CardContent>
+                  <Typography
+                    variant="h5"
+                    gutterBottom
+                    sx={{ fontWeight: "bold" }}
+                  >
+                    {option.title}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    color="textSecondary"
+                    gutterBottom
+                  >
+                    {option.guests}
+                  </Typography>
+                  {option.price && (
+                    <Typography
+                      variant="h4"
+                      gutterBottom
+                      sx={{ color: "#FFC107" }}
+                    >
+                      {option.price}
+                    </Typography>
+                  )}
+                </CardContent>
+                <Box sx={{ mt: 3 }}>
+                  {option.title === "Custom" ? (
+                    <Button
+                      component={Link}
+                      to="/contact"
+                      variant="contained"
+                      sx={{
+                        bgcolor: "#000",
+                        color: "#FFC107",
+                        "&:hover": { bgcolor: "#333" },
+                      }}
+                    >
+                      Contact Us
+                    </Button>
+                  ) : (
+                    <Button
+                      component={Link}
+                      to={`/register?plan=${option.title}`}
+                      variant="contained"
+                      sx={{
+                        bgcolor: "#FFC107",
+                        color: "#000",
+                        "&:hover": { bgcolor: "#ffb300" },
+                      }}
+                    >
+                      Choose Plan
+                    </Button>
+                  )}
+                </Box>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
     </Container>
   );

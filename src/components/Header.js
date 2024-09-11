@@ -6,12 +6,19 @@ const Header = () => {
   return (
     <AppBar position="static" color="transparent" elevation={0}>
       <Toolbar>
+        {/* Logo as a clickable link to the homepage */}
         <Typography
           variant="h6"
-          component="div"
-          sx={{ flexGrow: 1, fontWeight: "bold" }}
+          component={Link}
+          to="/"
+          sx={{
+            flexGrow: 1,
+            fontWeight: "bold",
+            textDecoration: "none",
+            color: "inherit",
+          }}
         >
-          ClickPics
+          ClickPics {/* You can replace this with an image or logo */}
         </Typography>
 
         <Box>
