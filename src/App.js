@@ -7,7 +7,8 @@ import Login from "./components/Login";
 import CreateEvent from "./components/CreateEvent";
 import UploadImage from "./components/UploadImage";
 import Dashboard from "./components/DashBoard";
-import Header from "./components/Header"; // Import the Header component
+import Header from "./components/Header";
+import Profile from "./components/Profile"; // Import the Profile component
 
 // Create a custom theme with yellow and black colors
 const theme = createTheme({
@@ -48,6 +49,8 @@ function App() {
           <Route path="/create-event" element={<CreateEvent />} />
           <Route path="/upload-image" element={<UploadImage />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />{" "}
+          {/* Add profile route */}
         </Routes>
       </div>
     </ThemeProvider>

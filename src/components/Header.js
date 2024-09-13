@@ -1,8 +1,16 @@
 import React from "react";
 import { AppBar, Toolbar, Button, Typography, Box } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const token = localStorage.getItem("authToken"); // Check if the user is logged in
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken"); // Remove token from localStorage
+    navigate("/"); // Redirect to home page after logout
+  };
+
   return (
     <AppBar position="static" color="transparent" elevation={0}>
       <Toolbar>
@@ -22,22 +30,44 @@ const Header = () => {
         </Typography>
 
         <Box>
-          <Button
-            color="inherit"
-            component={Link}
-            to="/login"
-            sx={{ marginRight: 2 }}
-          >
-            Login
-          </Button>
-          <Button
-            variant="contained"
-            color="primary"
-            component={Link}
-            to="/register"
-          >
-            Sign Up
-          </Button>
+          {token ? (
+            <>
+              <Button
+                color="inherit"
+                component={Link}
+                to="/profile"
+                sx={{ marginRight: 2 }}
+              >
+                Profile
+              </Button>
+              <Button
+                color="inherit"
+                onClick={handleLogout}
+                sx={{ marginRight: 2 }}
+              >
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                color="inherit"
+                component={Link}
+                to="/login"
+                sx={{ marginRight: 2 }}
+              >
+                Login
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                component={Link}
+                to="/register"
+              >
+                Sign Up
+              </Button>
+            </>
+          )}
         </Box>
       </Toolbar>
     </AppBar>

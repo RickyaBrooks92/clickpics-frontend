@@ -13,6 +13,8 @@ import {
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 function Register({ setAuthToken }) {
+  const [firstName, setFirstName] = useState(""); // First name state
+  const [lastName, setLastName] = useState(""); // Last name state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -38,7 +40,7 @@ function Register({ setAuthToken }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ firstName, lastName, email, password }),
       });
 
       const data = await response.json();
@@ -95,6 +97,30 @@ function Register({ setAuthToken }) {
         </Box>
 
         <form onSubmit={handleSubmit}>
+          <TextField
+            label="First Name"
+            name="firstName"
+            type="text"
+            variant="outlined"
+            fullWidth
+            required
+            margin="normal"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+          />
+
+          <TextField
+            label="Last Name"
+            name="lastName"
+            type="text"
+            variant="outlined"
+            fullWidth
+            required
+            margin="normal"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+          />
+
           <TextField
             label={emailFilled ? "" : "Email"}
             name="email"
