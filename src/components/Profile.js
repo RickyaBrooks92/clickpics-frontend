@@ -108,15 +108,18 @@ const Profile = () => {
             <Typography variant="h6" gutterBottom>
               Events
             </Typography>
-            {userInfo.eventId ? (
-              <Box>
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  Event: {userInfo.eventId.name}
-                </Typography>
-                <Typography variant="body1" sx={{ mb: 2 }}>
-                  Date: {new Date(userInfo.eventId.date).toLocaleDateString()}
-                </Typography>
-              </Box>
+            {userInfo.events && userInfo.events.length > 0 ? (
+              userInfo.events.map((event) => (
+                <Box key={event._id} sx={{ mb: 2 }}>
+                  <Typography variant="body1">
+                    Event Name: {event.name}
+                  </Typography>
+                  <Typography variant="body2">
+                    Date: {new Date(event.date).toLocaleDateString()}
+                  </Typography>
+                  <Divider sx={{ mt: 2 }} />
+                </Box>
+              ))
             ) : (
               <Typography variant="body1" color="textSecondary">
                 You haven't created any events yet.
